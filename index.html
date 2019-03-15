@@ -5,7 +5,16 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="stylesheet" type="text/css" href="css/site.css"/>
       <link rel="stylesheet" type="text/css" href="css/loader.css"/>
-      <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700" rel="stylesheet">       
+      <link rel="stylesheet" type="text/css" href="css/leaflet.css"/>
+      <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700" rel="stylesheet">
+      <script src="js/jquery.js"></script>
+      <script src="js/d3.min.js"></script>
+      <script src="js/d3.tip.min.js"></script>
+      <script src="js/crossfilter.v1.min.js"></script>
+      <script src="js/dc.js"></script>
+      <script src="js/leaflet.js"></script>
+      <script src="js/dc.leaflet.js"></script>
+      <script src="js/bootstrap.min.js"></script>
     </head>
     <body>
       <div class='sp sp-circle'></div>
@@ -18,7 +27,8 @@
         </header>
 
         <div class='map__container column span6'>
-          <div id='map'>map here</div>
+          <div id='map'></div>
+          <p class="small">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
         </div>
 
         <div class='area-chart__container column span6'>
@@ -30,6 +40,7 @@
             key drivers here
           </div>
         </div>
-      </div> 
+      </div>
+      <script src="js/site.js"></script>
     </body>
 </html>
