@@ -27,18 +27,16 @@ function hxlProxyToJSON(input){
 }
 
 function generateGraphes (geom, ipcData) {
-    var ndx = crossfilter(ipcData);
+    ndx = crossfilter(ipcData);
 
     var map = dc.leafletChoroplethChart('#map');
-
     var mapDim = ndx.dimension(function(d){
         return d['#adm2+code'];
     });
     var mapGroup = mapDim.group();
 
-
     map.width($('#map').width())
-        // .height(350)
+        //.height(350)
         .dimension(mapDim)
         .group(mapGroup)
         .center([0, 0])
@@ -57,6 +55,8 @@ function generateGraphes (geom, ipcData) {
             return feature.properties['DIS_CODE'];
 
         }).popup(function (feature) {
+            console.log(feature.properties['DIST_NAME']);
+            updateAreaChart(feature.properties['DIST_NAME']);
             return feature.properties['DIST_NAME'];
         })
         .renderPopup(true);
@@ -76,6 +76,132 @@ function generateGraphes (geom, ipcData) {
 
 } //generateGraphes
 
+function getPhaseData(phase) {
+    regionDimension.filter(function(d) {return d === currentRegion + '-' + phase});
+    var array = regionDimension.top(Infinity);
+    array.sort(function(a, b) {
+        a = new Date(a['#date']);
+        b = new Date(b['#date']);
+        return a<b ? -1 : a>b ? 1 : 0;
+    });
+
+    //format data arrays for c3 area chart
+    var phaseArray = [];
+    var dateArray = [];
+    dateArray.push('date');
+    phaseArray.push(phase);
+    for (var i=0; i<array.length; i++) {
+        dateArray[i+1] = array[i]['#date']+'-01';
+        phaseArray.push(array[i]['#output']);
+    }
+    return {output: phaseArray, date: dateArray};
+}
+
+function generateAreaChart(ipcData) {
+    ndx = crossfilter(ipcData);
+    regionDimension = ndx.dimension(function(d){
+        var phase = d['#indicator+ipc'].replace(' ', '');
+        return d['#adm2+name']+'-'+phase;
+    });
+
+    var dateArray = getPhaseData('Phase1').date;
+    var numYears = Math.round(dateArray.length/12);
+
+    areaChart = c3.generate({
+        bindto: '#areaChart',
+        title: { text: 'Phase Population Distribution' },
+        transition: {duration: 100 },
+        padding: { right: 20, top: 40 },
+        data: {
+            x: 'date',
+            columns: [
+                dateArray,
+                getPhaseData('Phase1').output,
+                getPhaseData('Phase2').output,
+                getPhaseData('Phase3').output,
+                getPhaseData('Phase4').output,
+                getPhaseData('Phase5').output
+            ],
+            type: 'area-spline',
+            colors: {
+                Phase1: colorIPC[0],
+                Phase2: colorIPC[1],
+                Phase3: colorIPC[2],
+                Phase4: colorIPC[3],
+                Phase5: colorIPC[4]
+            },
+            groups: [['Phase1', 'Phase2' ,'Phase3', 'Phase4', 'Phase5']]
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                tick: {
+                    format: "%Y",
+                    count: numYears
+                },
+                padding: { right: 20, left: 0 }
+            },
+            y: { min: 0.1 }
+        },
+        tooltip: {
+            format: {
+                title: function (d) { return monthNames[d.getMonth()]+ ' ' +d.getFullYear(); },
+                name: function (name) { return name.replace('Phase', 'Phase '); },
+                value: d3.format(',.3f')
+            }
+        },
+        legend: {
+            show: false
+        }
+    });
+
+    var legendTitles = {Phase1: 'Phase 1<br>Minimal',
+                        Phase2: 'Phase 2<br>Stressed',
+                        Phase3: 'Phase 3<br>Crisis',
+                        Phase4: 'Phase 4<br>Emergency',
+                        Phase5: 'Phase 5<br>Famine',
+    };
+    d3.select('#areaChart').insert('div', '.chart').attr('class', 'legend').selectAll('span')
+        .data(['Phase1', 'Phase2', 'Phase3', 'Phase4', 'Phase5'])
+      .enter().append('span')
+        .attr('data-id', function (id) { return id; })
+        .html(function (id) { return legendTitles[id]; })
+        .each(function (id) {
+            var num = id[id.length-1];
+            console.log(num);
+            d3.select(this).style('background-color', colorIPC[num-1]);
+        })
+        .on('mouseover', function (id) {
+            console.log(id)
+            areaChart.focus(id);
+        })
+        .on('mouseout', function (id) {
+            areaChart.revert();
+        })
+        .on('click', function (id) {
+            areaChart.toggle(id);
+        });
+}
+
+function updateAreaChart(region) {
+    currentRegion = region;
+    areaChart.load({
+        columns: [
+            getPhaseData('Phase1').output,
+            getPhaseData('Phase2').output,
+            getPhaseData('Phase3').output,
+            getPhaseData('Phase4').output,
+            getPhaseData('Phase5').output
+        ]
+    });
+}
+
+//global vars
+var currentRegion = 'Baki';
+var ndx, areaChart, regionDimension;
+var colorIPC = ['#CCFFCC','#FAE61E','#E67800','#C80000','#640000'];
+var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
 
 var geomCall = $.ajax({
     type: 'GET',
@@ -93,4 +219,5 @@ $.when(geomCall, ipcDataCall).then(function(geomArgs, ipcDataArgs){
     var geom = geomArgs[0];
     var ipcData = hxlProxyToJSON(ipcDataArgs[0]);
     generateGraphes(geom, ipcData);
+    generateAreaChart(ipcData);
 });
