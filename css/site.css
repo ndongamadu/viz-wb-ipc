@@ -25,6 +25,11 @@ label {
 	letter-spacing: 1;
 }
 
+p.small {
+	font-size: 10px;
+	font-style: italic;
+}
+
 .header__inner {
   display: grid;
   grid-column: 4 / span 6;
@@ -76,4 +81,33 @@ label {
   height: 400px;
   margin-bottom: 7px;
   margin-top: 10px;
+}
+
+#areaChart {
+	padding-top: 20px;
+}
+#areaChart .c3-chart-lines .c3-chart-line .c3-circles {
+    display: none;
+}
+#areaChart .c3-area {
+  opacity: 1;
+}
+#areaChart .c3-title {
+	font-family: 'Source Sans Pro', sans-serif;
+	letter-spacing: 0.3;
+	text-transform: uppercase;
+}
+#areaChart .legend {
+	display: flex;
+	margin-left: 40px;
+	margin-top: 25px;
+}
+#areaChart .legend span {
+	color: #FFF;
+	font-size: 12px;
+	padding: 5px 15px;
+  text-align: center;
+}
+#areaChart .legend span:nth-child(-n + 2) {
+	color: #333;
 }
