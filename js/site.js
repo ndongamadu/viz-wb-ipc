@@ -55,7 +55,7 @@ function generateGraphes (geom, ipcData) {
             return feature.properties['DIS_CODE'];
 
         }).popup(function (feature) {
-            console.log(feature.properties['DIST_NAME']);
+            // console.log(feature.properties['DIST_NAME']);
             updateAreaChart(feature.properties['DIST_NAME']);
             return feature.properties['DIST_NAME'];
         })
@@ -84,7 +84,6 @@ function getPhaseData(phase) {
         b = new Date(b['#date']);
         return a<b ? -1 : a>b ? 1 : 0;
     });
-
     //format data arrays for c3 area chart
     var phaseArray = [];
     var dateArray = [];
@@ -97,11 +96,64 @@ function getPhaseData(phase) {
     return {output: phaseArray, date: dateArray};
 }
 
-function generateAreaChart(ipcData) {
+function getKeyDriverIndicatorData() {
+    var selectedKeyDriver = $('#key_drivers option:selected').text();
+    var selectedYear = $('#key_drivers_year option:selected').text();
+
+    var array = regionDimension2.filter(function(d){
+        return d === selectedYear+'-'+currentRegion+'-'+selectedKeyDriver;
+    }).top(Infinity);
+
+    var arrayAll = regionDimension2.filterAll().top(Infinity).filter(function(d){
+        return d['#adm2+name']===currentRegion && d['#date'].split('-')[0]===selectedYear;
+    });
+    var kdTypes = [],
+        kdPercentages = [];
+    for (var i = 0; i < arrayAll.length; i++) {
+        kdTypes.includes(arrayAll[i]['#indicator+type']) ? '' : kdTypes.push(arrayAll[i]['#indicator+type']);
+    }
+
+    for (var i = 0; i < kdTypes.length; i++) {
+        var valence=0;
+        for (var k = 0; k < arrayAll.length; k++) {
+            arrayAll[k]['#indicator+type']===kdTypes[i] ? valence +=1 : '';
+        }
+        kdPercentages[i] = (valence/arrayAll.length)*100 ;
+    }
+    array.sort(function(a, b) {
+        if (a.key > b.key) return 1;
+        if (a.key < b.key) return -1;
+        return 0;
+    });
+
+    var indicatorsArray = [],
+        valuesArray = [];
+    indicatorsArray.push('x');
+    valuesArray.push('Importance');
+    for (var i = 0; i < array.length; i++) {
+        indicatorsArray.includes(array[i]['#indicator']) ? '' : indicatorsArray.push(array[i]['#indicator']);
+    }
+    for (var i = 1; i < indicatorsArray.length; i++) {
+        var sum = 0 ;
+        for (var j = 0; j < array.length; j++) {
+            array[j]['#indicator']===indicatorsArray[i] ? sum += Number(array[j]['#output']) : '';
+        }
+        valuesArray[i] = sum;
+    }
+    return {indicators: [valuesArray, indicatorsArray], types: [kdTypes,kdPercentages]};
+} // getKeyDriverIndicatorData
+
+function generateAreaChart(ipcData, kdData) {
     ndx = crossfilter(ipcData);
     regionDimension = ndx.dimension(function(d){
         var phase = d['#indicator+ipc'].replace(' ', '');
         return d['#adm2+name']+'-'+phase;
+    });
+
+    ndx2 = crossfilter(kdData);
+    regionDimension2 = ndx2.dimension(function(d){
+        var annee = d['#date'].split('-')[0];
+        return annee+'-'+d['#adm2+name']+'-'+d['#indicator+type'];
     });
 
     var dateArray = getPhaseData('Phase1').date;
@@ -168,11 +220,11 @@ function generateAreaChart(ipcData) {
         .html(function (id) { return legendTitles[id]; })
         .each(function (id) {
             var num = id[id.length-1];
-            console.log(num);
+            // console.log(num);
             d3.select(this).style('background-color', colorIPC[num-1]);
         })
         .on('mouseover', function (id) {
-            console.log(id)
+            // console.log(id)
             areaChart.focus(id);
         })
         .on('mouseout', function (id) {
@@ -181,6 +233,33 @@ function generateAreaChart(ipcData) {
         .on('click', function (id) {
             areaChart.toggle(id);
         });
+
+    // Key drivers bar chart
+    var kdrivs = getKeyDriverIndicatorData();
+    console.log(kdrivs.indicators);
+    keyDriversChart = c3.generate({
+        bindto:'#keydriversChart',
+        data: {
+            x: 'x',
+            columns: [kdrivs.indicators[1], kdrivs.indicators[0]],
+            type: 'bar',
+        },
+        axis:{
+            rotated: true,
+            x: {
+                type: 'category',
+            },
+        }
+    });
+
+    //pie chart
+    pieChart = c3.generate({
+        bindto: '#piechart',
+        data: {
+            rows:[kdrivs.types[0],kdrivs.types[1]],
+            type: 'pie',
+        }
+    })
 }
 
 function updateAreaChart(region) {
@@ -194,11 +273,20 @@ function updateAreaChart(region) {
             getPhaseData('Phase5').output
         ]
     });
+    var kd = getKeyDriverIndicatorData();
+    keyDriversChart.load({
+        columns:[kd.indicators[1],kd.indicators[0]]
+    });
+    pieChart.load({
+        rows:[kd.types[1],kd.types[0]]
+    });
 }
 
 //global vars
 var currentRegion = 'Baki';
-var ndx, areaChart, regionDimension;
+var ndx, areaChart, regionDimension,
+    ndx2, keyDriversChart, regionDimension2,
+    pieChart;
 var colorIPC = ['#CCFFCC','#FAE61E','#E67800','#C80000','#640000'];
 var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -214,10 +302,17 @@ var ipcDataCall = $.ajax({
     url: 'https://data.humdata.org/hxlproxy/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1O2r2RBXL2bFwbMaZbxKRHU2kgnjHeppgHRJ7f4xeC4Y%2Fedit%23gid%3D1910750868',
     dataType: 'JSON',
 });
+var ipcKeyDriversDataCall = $.ajax({
+    type: 'GET',
+    url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1HYWionmx6RDoGb8cG2eh6TrArsNqt2JvqtvYSYxNEcg%2Fedit%3Fusp%3Dsharing',
+    dataType: 'JSON',
+});
 
-$.when(geomCall, ipcDataCall).then(function(geomArgs, ipcDataArgs){
+
+$.when(geomCall, ipcDataCall, ipcKeyDriversDataCall).then(function(geomArgs, ipcDataArgs, ipcKeyDriversDataArgs){
     var geom = geomArgs[0];
     var ipcData = hxlProxyToJSON(ipcDataArgs[0]);
+    var ipcKeyDriversData = hxlProxyToJSON(ipcKeyDriversDataArgs[0]);
     generateGraphes(geom, ipcData);
-    generateAreaChart(ipcData);
+    generateAreaChart(ipcData, ipcKeyDriversData);
 });

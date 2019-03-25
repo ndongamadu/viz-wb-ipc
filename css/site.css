@@ -111,3 +111,8 @@ p.small {
 #areaChart .legend span:nth-child(-n + 2) {
 	color: #333;
 }
+
+.kd__selection {
+	display: grid;
+	grid-column: 1 / span 8;
+}
