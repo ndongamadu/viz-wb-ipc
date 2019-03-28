@@ -220,11 +220,9 @@ function generateAreaChart(ipcData, kdData) {
         .html(function (id) { return legendTitles[id]; })
         .each(function (id) {
             var num = id[id.length-1];
-            // console.log(num);
             d3.select(this).style('background-color', colorIPC[num-1]);
         })
         .on('mouseover', function (id) {
-            // console.log(id)
             areaChart.focus(id);
         })
         .on('mouseout', function (id) {
@@ -246,18 +244,20 @@ function generateAreaChart(ipcData, kdData) {
         },
         axis:{
             rotated: true,
-            x: {
-                type: 'category',
-            },
+            x: { type: 'category' },
+            y: { padding: {bottom: 0}}
         }
     });
 
     //pie chart
     pieChart = c3.generate({
-        bindto: '#piechart',
+        bindto: '#pieChart',
         data: {
             rows:[kdrivs.types[0],kdrivs.types[1]],
             type: 'pie',
+        },
+        legend:{
+            show: false,
         }
     })
 }
@@ -296,10 +296,10 @@ var geomCall = $.ajax({
     url: 'data/Somalia_District_Polygon.json',
     dataType: 'json',
 });
-
+//,https://data.humdata.org/hxlproxy
 var ipcDataCall = $.ajax({
     type: 'GET',
-    url: 'https://data.humdata.org/hxlproxy/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1O2r2RBXL2bFwbMaZbxKRHU2kgnjHeppgHRJ7f4xeC4Y%2Fedit%23gid%3D1910750868',
+    url: 'https://proxy.hxlstandard.org/data.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1O2r2RBXL2bFwbMaZbxKRHU2kgnjHeppgHRJ7f4xeC4Y%2Fedit%23gid%3D1910750868',
     dataType: 'JSON',
 });
 var ipcKeyDriversDataCall = $.ajax({
@@ -315,4 +315,8 @@ $.when(geomCall, ipcDataCall, ipcKeyDriversDataCall).then(function(geomArgs, ipc
     var ipcKeyDriversData = hxlProxyToJSON(ipcKeyDriversDataArgs[0]);
     generateGraphes(geom, ipcData);
     generateAreaChart(ipcData, ipcKeyDriversData);
+
+    //display main
+    $('.sp-circle').remove();
+    $('main').removeClass('hidden');
 });
