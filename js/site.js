@@ -255,6 +255,9 @@ function generateAreaChart(ipcData, kdData) {
         data: {
             rows:[kdrivs.types[0],kdrivs.types[1]],
             type: 'pie',
+        },
+        legend:{
+            show: false,
         }
     })
 }
