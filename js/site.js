@@ -234,7 +234,7 @@ function generateAreaChart(ipcData, kdData) {
 
     // Key drivers bar chart
     var kdrivs = getKeyDriverIndicatorData();
-    console.log(kdrivs.indicators);
+
     keyDriversChart = c3.generate({
         bindto:'#keydriversChart',
         data: {
@@ -246,6 +246,11 @@ function generateAreaChart(ipcData, kdData) {
             rotated: true,
             x: { type: 'category' },
             y: { padding: {bottom: 0}}
+        },
+        tooltip:{
+            format: {
+                value: d3.format(',.3f')
+            }
         }
     });
 
@@ -281,6 +286,25 @@ function updateAreaChart(region) {
         rows:[kd.types[1],kd.types[0]]
     });
 }
+
+$('#key_drivers').on('change', function(e){
+    var kd = getKeyDriverIndicatorData();
+    keyDriversChart.load({
+        columns:[kd.indicators[1],kd.indicators[0]]
+    });
+    pieChart.load({
+        rows:[kd.types[1],kd.types[0]]
+    });
+});
+$('#key_drivers_year').on('change', function(e){
+    var kd = getKeyDriverIndicatorData();
+    keyDriversChart.load({
+        columns:[kd.indicators[1],kd.indicators[0]]
+    });
+    pieChart.load({
+        rows:[kd.types[1],kd.types[0]]
+    });
+});
 
 //global vars
 var currentRegion = 'Baki';
