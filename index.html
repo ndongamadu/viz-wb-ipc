@@ -1,63 +1,86 @@
 <html>
-    <head>
-      <title>World Bank - IPC</title>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" type="text/css" href="css/site.css"/>
-      <link rel="stylesheet" type="text/css" href="css/loader.css"/>
-      <link rel="stylesheet" type="text/css" href="css/leaflet.css"/>
-      <link rel="stylesheet" type="text/css" href="css/c3.min.css"/>
-      <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700" rel="stylesheet">
-      <script src="js/jquery.js"></script>
-      <script src="js/d3.min.js"></script>
-      <script src="js/d3.tip.min.js"></script>
-      <script src="js/crossfilter.v1.min.js"></script>
-      <script src="js/dc.js"></script>
-      <script src="js/leaflet.js"></script>
-      <script src="js/dc.leaflet.js"></script>
-      <script src="js/c3.min.js"></script>
-    </head>
-    <body>
-      <div class='sp sp-circle'></div>
-      <div class='grid__container'>
-        <header>
-          <div class='header__inner'>
-            <h1>World Bank IPC Visualization</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in.</p>
-          </div>
-        </header>
-
-        <div class='map__container column span6'>
-          <div id='map'></div>
-          <p class="small">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
-        </div>
-
-        <div class='area-chart__container column span6'>
-          <div id='areaChart'></div>
-        </div>
-
-        <div class='drivers__container column spanAll'>
-          <div id='drivers'>
-            <h4>KEY DRIVER</h4>
-            <select name="key_drivers" id="key_drivers">
-              <option value="1" selected>Agricultural Stress</option>
-              <option value="2">Conflict</option>
-              <option value="3">Market prices</option>
-              <option value="4">Contextual</option>
-            </select>
-            <h4>Year</h4>
-            <select name="yearFilter" id="key_drivers_year">
-              <option value="1" selected>2018</option>
-              <option value="2">2017</option>
-              <option value="3">2016</option>
-              <option value="4">2015</option>
-              <option value="5">2014</option>
-            </select>
-            <div id="keydriversChart"></div>
-            <div id="piechart"></div>
-          </div>
+  <head>
+    <title>World Bank - IPC</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/site.css"/>
+    <link rel="stylesheet" type="text/css" href="css/loader.css"/>
+    <link rel="stylesheet" type="text/css" href="css/leaflet.css"/>
+    <link rel="stylesheet" type="text/css" href="css/c3.min.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/d3.min.js"></script>
+    <script src="js/d3.tip.min.js"></script>
+    <script src="js/crossfilter.v1.min.js"></script>
+    <script src="js/dc.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/dc.leaflet.js"></script>
+    <script src="js/c3.min.js"></script>
+  </head>
+  <body>
+    <div class='sp sp-circle'></div>
+    <div class='container'>
+      <div class='row'>
+        <div class='col-md-12'>
+          <header>
+            <div class='header__inner'>
+              <h1>World Bank IPC Visualization</h1>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in.</p>
+            </div>
+          </header>
         </div>
       </div>
-      <script src="js/site.js"></script>
-    </body>
+
+      <main class='hidden'>
+        <div class='row'>
+          <div class='col-md-6'>
+            <div class='container-theme'>
+              <div id='map'></div>
+              <p class="small">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
+            </div>
+          </div>
+          <div class='col-md-6'>
+            <div class='container-theme container__area-chart'>
+              <div id='areaChart'></div>
+            </div>
+          </div>
+        </div>
+
+        <div class='container-theme'>
+          <div class='row'>
+            <div class='col-md-3'>
+              <label for="key_drivers">KEY DRIVER</label>
+              <select name="key_drivers" id="key_drivers" class="form-control">
+                <option value="1" selected>Agricultural Stress</option>
+                <option value="2">Conflict</option>
+                <option value="3">Market prices</option>
+                <option value="4">Contextual</option>
+              </select>
+            </div>
+            <div class='col-md-3'>
+              <label for="key_drivers_year">YEAR</label>
+              <select name="yearFilter" id="key_drivers_year" class="form-control">
+                <option value="1" selected>2018</option>
+                <option value="2">2017</option>
+                <option value="3">2016</option>
+                <option value="4">2015</option>
+                <option value="5">2014</option>
+              </select>
+            </div>
+          </div>
+          <div class='row'>
+            <div class='col-md-6'>
+              <div id="keydriversChart"></div>
+            </div>
+            <div class='col-md-6'>
+              <div id="pieChart"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+    <script src="js/site.js"></script>
+  </body>
 </html>
